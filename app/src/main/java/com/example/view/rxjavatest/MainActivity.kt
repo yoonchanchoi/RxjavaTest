@@ -1,7 +1,9 @@
 package com.example.view.rxjavatest
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import io.reactivex.Flowable
+import io.reactivex.Observable.fromArray
+import io.reactivex.Observable.just
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import java.util.*
@@ -22,6 +24,8 @@ class MainActivity : AppCompatActivity() {
         "https://line-api-5.com"
     )
 
+    val arrayTest = arrayListOf<String>("str1","str2","str3","str4")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -29,9 +33,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init(){
-        Flowable.fromIterable(urls)
-            .concatMapEager { result ->
-                request(result).toFlowable()
+        test1()
+        test2()
+    }
+
+    private fun test1(){
+        io.reactivex.Observable.fromIterable(urls)
+            .concatMap{ result ->
+                request(result).toObservable()
             }.subscribe({
                 println("${Date().time - startTime} $it")
             }, { error ->
@@ -44,8 +53,6 @@ class MainActivity : AppCompatActivity() {
         println("Process finished")
     }
 
-
-
     fun request(url: String): Single<String> {
         return Single.zip(
             Single.timer(Random.nextLong(2000), TimeUnit.MILLISECONDS),
@@ -55,6 +62,22 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
+    private fun test2(){
+        val source = fromArray(arrayTest)
+        source.concatMap {
+            Log.e("cyc","it-->$it")
+            it.forEach { str ->
+                str+"추가"
+            }
+            Log.e("cyc","concatmap 결과 -->$it")
+            return@concatMap just(it)
+        }
+//            .concatMap {
+//                Log.e("cyc","it-->$it")
+//
+//            }
+        //        val source2 = Observable.fromArray<String>(arrayTest)
+    }
 
 
 
