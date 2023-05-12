@@ -1,11 +1,17 @@
 package com.example.view.rxjavatest
+
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.Observable.fromArray
 import io.reactivex.Observable.just
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
@@ -13,7 +19,7 @@ import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
-
+    private val disposables by lazy { CompositeDisposable() }
 
     val startTime = Date().time
     val urls = listOf(
@@ -24,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         "https://line-api-5.com"
     )
 
-    val arrayTest = arrayListOf<String>("str1","str2","str3","str4")
+    val arrayTest = arrayListOf<String>("str1", "str2", "str3", "str4")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,14 +38,14 @@ class MainActivity : AppCompatActivity() {
         init()
     }
 
-    private fun init(){
+    private fun init() {
         test1()
         test2()
     }
 
-    private fun test1(){
+    private fun test1() {
         io.reactivex.Observable.fromIterable(urls)
-            .concatMap{ result ->
+            .concatMap { result ->
                 request(result).toObservable()
             }.subscribe({
                 println("${Date().time - startTime} $it")
@@ -62,16 +68,26 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
-    private fun test2(){
+    private fun test2() {
+        Log.e("cyc", "test2")
         val source = fromArray(arrayTest)
-        source.concatMap {
-            Log.e("cyc","it-->$it")
-            it.forEach { str ->
-                str+"추가"
+        Log.e("cyc", "test2--source--->")
+        source.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .concatMap {
+                Log.e("cyc", "it-->$it")
+                it.forEach { str ->
+                    Log.e("cyc","추가")
+                    str + "추가"
+                }
+                Log.e("cyc", "concatmap 결과 -->$it")
+                return@concatMap just(it)
             }
-            Log.e("cyc","concatmap 결과 -->$it")
-            return@concatMap just(it)
-        }
+            .subscribe({
+                Log.e("cyc", "it--subscribe-->$it")
+            },{
+                Log.e("cyc", "error")
+            }).addToDisposables()
 //            .concatMap {
 //                Log.e("cyc","it-->$it")
 //
@@ -79,6 +95,5 @@ class MainActivity : AppCompatActivity() {
         //        val source2 = Observable.fromArray<String>(arrayTest)
     }
 
-
-
+    private fun Disposable.addToDisposables(): Disposable = addTo(disposables)
 }
