@@ -3,8 +3,7 @@ package com.example.view.rxjavatest
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import io.reactivex.Observable.fromArray
-import io.reactivex.Observable.just
+import io.reactivex.Observable.*
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -12,8 +11,10 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
+import java.time.temporal.Temporal
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.forEach
 import kotlin.random.Random
 
 
@@ -70,18 +71,37 @@ class MainActivity : AppCompatActivity() {
 
     private fun test2() {
         Log.e("cyc", "test2")
-        val source = fromArray(arrayTest)
+        val source = fromIterable(arrayTest)
+//        val source = fromArray(arrayTest)
         Log.e("cyc", "test2--source--->")
         source.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .concatMap {
+//                val tempStr = StringBuilder()
+//
+//                it.map { strOne->
+//                    testMoth(strOne)
+//                    it
+////                    it+"추가"
+//                }
+//                it.map {
+//
+//                }
+
+
                 Log.e("cyc", "it-->$it")
+                val tempStr = StringBuilder()
                 it.forEach { str ->
                     Log.e("cyc","추가")
                     str + "추가"
+                    tempStr.append(str)
+                    tempStr.append("추가")
+                    Log.e("cyc","str-->${str}")
+                    Log.e("cyc","tempStr-->${tempStr}")
+
                 }
-                Log.e("cyc", "concatmap 결과 -->$it")
-                return@concatMap just(it)
+                io.reactivex.Observable.just(tempStr)
+
             }
             .subscribe({
                 Log.e("cyc", "it--subscribe-->$it")
@@ -94,6 +114,43 @@ class MainActivity : AppCompatActivity() {
 //            }
         //        val source2 = Observable.fromArray<String>(arrayTest)
     }
+
+
+//    fun testMoth(str: String): String{
+//        str+"추가"
+//    }
+
+//    private fun test2() {
+//        Log.e("cyc", "test2")
+//        val source = fromArray(arrayTest)
+//        Log.e("cyc", "test2--source--->")
+//        source.subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .concatMap {
+////                it.map {
+////                    it+"추가"
+////                }
+//
+//                Log.e("cyc", "it-->$it")
+//                it.forEach { str ->
+//                    Log.e("cyc","추가")
+//                    str + "추가"
+//                    Log.e("cyc","str-->${str.length}")
+//                }
+//                Log.e("cyc", "concatmap 결과 -->$it")
+//                return@concatMap just(it)
+//            }
+//            .subscribe({
+//                Log.e("cyc", "it--subscribe-->$it")
+//            },{
+//                Log.e("cyc", "error")
+//            }).addToDisposables()
+////            .concatMap {
+////                Log.e("cyc","it-->$it")
+////
+////            }
+//        //        val source2 = Observable.fromArray<String>(arrayTest)
+//    }
 
     private fun Disposable.addToDisposables(): Disposable = addTo(disposables)
 }
