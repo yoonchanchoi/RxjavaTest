@@ -133,5 +133,28 @@ class MainActivity : AppCompatActivity() {
         //        val source2 = Observable.fromArray<String>(arrayTest)
     }
 
+
+    private fun test3() {
+        Log.e("cyc", "test2")
+        val source = fromIterable(arrayTest)
+        Log.e("cyc", "test2--source--->")
+        source.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .flatMap {
+                return@flatMap just(it+"추가")
+//                return just(it+"추가")
+            }
+            .subscribe({
+                Log.e("cyc", "it--subscribe-->$it")
+            },{
+                Log.e("cyc", "error")
+            }).addToDisposables()
+//            .concatMap {
+//                Log.e("cyc","it-->$it")
+//
+//            }
+        //        val source2 = Observable.fromArray<String>(arrayTest)
+    }
+
     private fun Disposable.addToDisposables(): Disposable = addTo(disposables)
 }
