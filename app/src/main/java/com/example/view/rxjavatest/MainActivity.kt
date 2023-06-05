@@ -40,8 +40,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        test1()
-        test2()
+//        test1()
+//        test2()
+        test4()
     }
 
     private fun test1() {
@@ -112,17 +113,20 @@ class MainActivity : AppCompatActivity() {
     private fun test2() {
         Log.e("cyc", "test2")
         val source = fromArray(arrayTest)
-        Log.e("cyc", "test2--source--->")
+//        val source = fromIterable(arrayTest)
         source.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .concatMap {
-                it.map {
+            .concatMap { strArray->
+//                strArray + "추가"
+//                Log.e("cyc","strArray-->$strArray")
+                strArray.map {
                     it+"추가"
                 }
-                return@concatMap just(it)
+                Log.e("cyc","concatmapResult-->$strArray")
+                return@concatMap strArray
             }
             .subscribe({
-                Log.e("cyc", "it--subscribe-->$it")
+                Log.e("cyc", "it--subscribe--test2--->>$it")
             },{
                 Log.e("cyc", "error")
             }).addToDisposables()
@@ -151,9 +155,26 @@ class MainActivity : AppCompatActivity() {
             }).addToDisposables()
 //            .concatMap {
 //                Log.e("cyc","it-->$it")
-//
 //            }
         //        val source2 = Observable.fromArray<String>(arrayTest)
+    }
+    private fun test4(){
+        val source=fromArray(arrayOf("s1","s2","s3","s4"))
+        source.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .concatMap {
+                it.map {
+                    it+"a"
+                }.run {
+                    Log.e("cyc","삐질-run->$this")
+                    just(this)
+                }
+            }
+            .subscribe {
+                Log.e("cyc","삐질-subscribe->$it")
+
+                it
+            }
     }
 
     private fun Disposable.addToDisposables(): Disposable = addTo(disposables)
